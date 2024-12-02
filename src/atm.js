@@ -57,7 +57,7 @@ ATM = (function() {
 
     anotherTransactionCallback = function(err, choice) {
       if (err) { return; }
-      var answer = choice["another transaction?"].toLowerCase();
+      const answer = choice["another transaction?"].toLowerCase();
       if ( answer === "yes" || answer === "y" ) {
         transactionMenu.call(this);
       }
@@ -66,6 +66,90 @@ ATM = (function() {
       }
     };
 
+    transactionMenu = function() {
+      clearScreen();
+      console.log(promptSchemas["transactionMenu"]["properties"]["transaction menu"]["menu"]);
+      prompt.get( promptSchemas.transactionMenu, transactionMenuCallback.bind(this) );
+    };
+
+    withdrawFundsCallback = function (err, amount) {
+      if (err) { return; }
+      console.log("\n\n\n\n\n\n");
+      var withdrawalAmount = parseInt(amount["withdraw funds"], 10),
+      balance = this.withdrawFunds(withdrawalAmount),
+      balanceString = "$" + balance.toString(10).red;
+     
+      if (balance === "insufficient funds") {
+        console.error("insufficient funds for requested transaction".red);
+        return promptAnotherTransaction.call(this);
+      }
+      console.log( "\n\n\n\n\n\n\n\n\n\n\n","Hi ".blue + session.getUserName().blue );
+      console.log("success! your new balance is: ".blue, balanceString);
+      promptAnotherTransaction.call(this);
+    };
+
+    depositFundsCallback = function (err, amount) {
+      if (err) { return; }
+      console.log("\n\n\n\n\n\n");
+      var depositAmount =  parseFloat( amount["deposit funds"] ),
+      balance = this.depositFunds(depositAmount),
+      balanceString = "$" + balance.toString(10).red;
+      console.log( "\n\n\n\n\n\n\n\n\n\n\n","Hi ".blue + session.getUserName().blue );
+      console.log("success! your new balance is: ".blue, balanceString);
+      promptAnotherTransaction.call(this);
+    };
+
+    transferFundsCallback = function (err, amount) {
+      if (err) { return; }
+      console.log("\n\n\n\n\n\n");
+      var trnasferAmount =  parseFloat( amount["transfer funds"] ),
+      destAccount =  parseInt( amount["destination account"] ),
+      balance = this.transferFunds(trnasferAmount, destAccount),
+      balanceString = "$" + balance.toString(10).red;
+      if (balance === "invalid account") {
+        console.error("invalid destination account for requested transaction".red);
+        return promptAnotherTransaction.call(this);
+      }
+      console.log( "\n\n\n\n\n\n\n\n\n\n\n","Hi ".blue + session.getUserName().blue );
+      console.log(`success! your new balance is: `.blue, balanceString);
+      promptAnotherTransaction.call(this);
+    };
+
+
+    transactionMenuCallback = function(err, choice) {
+      if (err) { return; }
+      var promptTimeOut = setTimeout(promptAnotherTransaction.bind(this), 1500);
+      console.log("\n\n");
+      switch (choice["transaction menu"]) {
+      case "1":
+        //Check Balance 
+        var balance = "your balance is:  $" + this.checkBalance();
+        console.log(balance.blue);
+        break;
+      case "2":
+        //Withdraw Funds
+        clearTimeout(promptTimeOut);
+        console.log(promptSchemas["withdrawFunds"]["properties"]["withdraw funds"]["menu"]);
+        prompt.get( promptSchemas.withdrawFunds, withdrawFundsCallback.bind(this) );
+        break;
+      case "3":
+        //Deposit Funds
+        clearTimeout(promptTimeOut);
+        console.log(promptSchemas["depositFunds"]["properties"]["deposit funds"]["menu"]);
+        prompt.get( promptSchemas.depositFunds, depositFundsCallback.bind(this) );
+        break;
+      case "4":
+        //Transfer Funds
+        clearTimeout(promptTimeOut);
+        prompt.get( promptSchemas.transferFunds, transferFundsCallback.bind(this) );
+        break;
+      case "5":
+        //Transfer Funds
+        clearTimeout(promptTimeOut);
+        this.endSession()
+        break;
+      }
+    };
 
     // Create new account
     this.newAccount = function(initDeposit, initPin, name) {
@@ -112,6 +196,60 @@ ATM = (function() {
       setTimeout(this.on.bind(this), 2000);
       console.error("invalid account number".red);
       return "invalid account";
+    };
+
+    this.checkBalance = function() {
+      if (session) {
+        var balance = session.retrieveBalance(sessionPin, bankID);
+        return balance;
+      }
+      return "invalid session";
+    };
+
+    this.withdrawFunds = function(amount) {
+      if (session) {
+        var newBalance,
+        balance = this.checkBalance();
+        if (balance >= amount) {
+          newBalance = balance - amount;
+          balance = session.editBalance(sessionPin, bankID, newBalance);
+          return balance;
+        }
+        return "insufficient funds";
+      }
+      return "invalid session";
+    };
+
+    this.depositFunds = function(amount) {
+      if (session) {
+        var newBalance,
+        balance = this.checkBalance();
+        newBalance = balance + amount;
+        balance = session.editBalance(sessionPin, bankID, newBalance);
+        return balance;
+      }
+      return "invalid session";
+    };
+
+    this.transferFunds = function(amount, accountNumber) {
+      if (session) {
+        var newBalance,
+        balance = this.checkBalance();
+        if (this.accounts[accountNumber - 195342] instanceof Account) {
+          if (balance >= amount) {
+            var newBalance = balance - amount;
+            balance = session.editBalance(sessionPin, bankID, newBalance);
+            var destAccount = this.accounts.find(account => account.accountNumber === accountNumber)
+            var destBalance = destAccount.userBalance
+            destAccount.changeBalance(destBalance + amount)
+            return balance;
+          }
+          return "insufficient funds";
+        }
+        console.error("invalid account number".red);
+        return "invalid account";
+      }
+      return "invalid session";
     };
 
     this.endSession = function () {

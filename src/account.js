@@ -25,6 +25,10 @@ var Account = (function() {
         return false;
       };
 
+      this.getUserName = function() {
+          return userName;
+      };
+
       this.retrieveBalance = function(pin, bank) {
         if ( this.validate(pin, bank) ) {
           return this.userBalance;
