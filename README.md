@@ -24,7 +24,7 @@
   ```
 ##Launch Program
   ```bash
-  $ node app.js
+  $ npm run start
   ```
   If all goes as planned atm-simulator should run in the terminal window until interruped(CTRL-C) or closed.
 
