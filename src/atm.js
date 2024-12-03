@@ -124,6 +124,7 @@ ATM = (function() {
       case "1":
         //Check Balance 
         var balance = "your balance is:  $" + this.checkBalance();
+        console.log( "\n\n\n\n\n\n\n\n\n\n\n","Hi ".blue + session.getUserName().blue );
         console.log(balance.blue);
         break;
       case "2":
@@ -155,7 +156,7 @@ ATM = (function() {
     this.newAccount = function(initDeposit, initPin, name) {
       var newAccount = new Account(initDeposit, initPin, bankID, name);
       this.accounts.push(newAccount);
-      newAccount.accountNumber = this.accounts.length + 195341;
+      newAccount.accountNumber = this.accounts.length + 111111;
       return newAccount.accountNumber;
     };
    
@@ -171,12 +172,12 @@ ATM = (function() {
         return; 
       }
       var accountNumber = credentials["account number"];
-      if ( this.accounts[accountNumber - 195342] instanceof Account) {
+      if ( this.accounts[accountNumber - 111112] instanceof Account) {
         var verified,
         pin = credentials["pin"];
-        verified = this.accounts[accountNumber - 195342].validate(pin, bankID);
+        verified = this.accounts[accountNumber - 111112].validate(pin, bankID);
         if (verified) {
-          session = this.accounts[accountNumber - 195342];
+          session = this.accounts[accountNumber - 111112];
           sessionPin = pin;
           this.atmStatus = "IN SESSION";
           if (!newUser) {
@@ -235,7 +236,7 @@ ATM = (function() {
       if (session) {
         let newBalance,
         balance = this.checkBalance();
-        if (this.accounts[accountNumber - 195342] instanceof Account) {
+        if (this.accounts[accountNumber - 111112] instanceof Account) {
           if (balance >= amount) {
             newBalance = balance - amount;
             balance = session.editBalance(sessionPin, bankID, newBalance);
