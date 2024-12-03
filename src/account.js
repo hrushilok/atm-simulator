@@ -1,16 +1,9 @@
 var Account = (function() {
     function Account(initDeposit, initPin, bank, name) {
-      var userPin, accountLedger, setPin, bankID;
-      userPin = initPin;
+      const userPin = initPin;
       this.userBalance = initDeposit;
-      bankID = bank;
-      userName = name;
-      accountLedger = [];
-
-      //Private Method
-      setPin = function(newPin) {
-        userPin = newPin;
-      };
+      const bankID = bank;
+      const userName = name;
 
       //Public Methods
 

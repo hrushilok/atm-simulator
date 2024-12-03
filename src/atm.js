@@ -1,14 +1,14 @@
-var Account, prompt, promptSchemas, colors, ATM;
+let Account, prompt, promptSchemas, colors, ATM;
 Account = require('./account.js');
 promptSchemas = require('./prompt_schemas.js');
 prompt = require('prompt');
+// eslint-disable-next-line no-unused-vars
 colors = require('colors');
 
 ATM = (function() {
   function ATM() {
-    var bankID, session, sessionPin, defaultScreenCallback,userRegistrationCallback, transactionMenu,
-      transactionMenuCallback, promptAnotherTransaction, anotherTransactionCallback,
-       withdrawFundsCallback, depositFundsCallback, clearScreen;
+    let bankID, session, sessionPin;
+       
     bankID = Math.floor(Math.random() * 1000000000000000).toString(10);
 
     prompt.start();
@@ -17,12 +17,12 @@ ATM = (function() {
     this.atmStatus = "ON";
     this.accounts = [];
 
-    clearScreen = function() {
+    const clearScreen = function() {
       process.stdout.write('\u001B[2J\u001B[0;0f');
     };
 
 
-    defaultScreenCallback = function(err, choice) {
+    const defaultScreenCallback = function(err, choice) {
       clearScreen();
       if (err) { return; }
       if (choice["default screen"] === "1") {
@@ -33,7 +33,7 @@ ATM = (function() {
       }
     };
 
-    userRegistrationCallback = function(err, credentials) {
+    const userRegistrationCallback = function(err, credentials) {
       clearScreen();
       if (err) { return; }
       if ( credentials["secure pin"] !== credentials["verify pin"] ) {
@@ -43,19 +43,19 @@ ATM = (function() {
       var initDeposit = parseFloat( credentials["initial deposit"] ),
       initPin = credentials["secure pin"],
       username = credentials["user name"]
-      accountNumber = this.newAccount(initDeposit, initPin, username),
-      accountNumberString = accountNumber.toString(10).red;
+      const accountNumber = this.newAccount(initDeposit, initPin, username)
+      const accountNumberString = accountNumber.toString(10).red;
       console.log( "\n\n\n\n\n\n\n\n\n\n\n","Hi ".blue + username.blue );
       console.log( "\n\n\n\n\n\n\n\n\n\n\n","WRITE THIS DOWN: your account number is ".blue + accountNumberString );
       this.startSession( err, {"account number": accountNumber, "pin": initPin}, true );
     };
 
-    promptAnotherTransaction = function(){
+    const promptAnotherTransaction = function(){
       console.log("\n\n\n\n");
       prompt.get( promptSchemas.anotherTransaction, anotherTransactionCallback.bind(this) );
     };
 
-    anotherTransactionCallback = function(err, choice) {
+    const anotherTransactionCallback = function(err, choice) {
       if (err) { return; }
       const answer = choice["another transaction?"].toLowerCase();
       if ( answer === "yes" || answer === "y" ) {
@@ -66,13 +66,13 @@ ATM = (function() {
       }
     };
 
-    transactionMenu = function() {
+    const transactionMenu = function() {
       clearScreen();
       console.log(promptSchemas["transactionMenu"]["properties"]["transaction menu"]["menu"]);
       prompt.get( promptSchemas.transactionMenu, transactionMenuCallback.bind(this) );
     };
 
-    withdrawFundsCallback = function (err, amount) {
+    const withdrawFundsCallback = function (err, amount) {
       if (err) { return; }
       console.log("\n\n\n\n\n\n");
       var withdrawalAmount = parseInt(amount["withdraw funds"], 10),
@@ -88,7 +88,7 @@ ATM = (function() {
       promptAnotherTransaction.call(this);
     };
 
-    depositFundsCallback = function (err, amount) {
+    const depositFundsCallback = function (err, amount) {
       if (err) { return; }
       console.log("\n\n\n\n\n\n");
       var depositAmount =  parseFloat( amount["deposit funds"] ),
@@ -99,7 +99,7 @@ ATM = (function() {
       promptAnotherTransaction.call(this);
     };
 
-    transferFundsCallback = function (err, amount) {
+    const transferFundsCallback = function (err, amount) {
       if (err) { return; }
       console.log("\n\n\n\n\n\n");
       var trnasferAmount =  parseFloat( amount["transfer funds"] ),
@@ -116,7 +116,7 @@ ATM = (function() {
     };
 
 
-    transactionMenuCallback = function(err, choice) {
+    const transactionMenuCallback = function(err, choice) {
       if (err) { return; }
       var promptTimeOut = setTimeout(promptAnotherTransaction.bind(this), 1500);
       console.log("\n\n");
@@ -233,14 +233,14 @@ ATM = (function() {
 
     this.transferFunds = function(amount, accountNumber) {
       if (session) {
-        var newBalance,
+        let newBalance,
         balance = this.checkBalance();
         if (this.accounts[accountNumber - 195342] instanceof Account) {
           if (balance >= amount) {
-            var newBalance = balance - amount;
+            newBalance = balance - amount;
             balance = session.editBalance(sessionPin, bankID, newBalance);
-            var destAccount = this.accounts.find(account => account.accountNumber === accountNumber)
-            var destBalance = destAccount.userBalance
+            const destAccount = this.accounts.find(account => account.accountNumber === accountNumber)
+            const destBalance = destAccount.userBalance
             destAccount.changeBalance(destBalance + amount)
             return balance;
           }
